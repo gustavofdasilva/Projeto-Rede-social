@@ -1,0 +1,8 @@
+Incluir Imagem de usuário
+Incluir Nome do usuário
+Armazenar Nome do usuário na gravação do post
+Salvar login do usuário no navegador e fazer variações na página se estiver logado ou não
+modularizar
+    fetch
+    componentes - button - form - titles - etc
+    format date

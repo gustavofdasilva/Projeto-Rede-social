@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { NavigateFunction, useNavigate } from "react-router-dom"
 type Form = {
   email: string,
   password: string,
@@ -6,6 +7,7 @@ type Form = {
 
 const Register = () => {
   
+  const navigate = useNavigate()
   const [email, setEmail] = useState<boolean>()
   const [password, setPassword] = useState<boolean>()
   const [formData, setFormData] = useState<Form>()
@@ -25,12 +27,32 @@ const Register = () => {
           onChange={(value)=>{checkPassword(value.target.value, setPassword, formData, setFormData)}}/>
           {!password && <div className="invalid-feedback mb-2 ">A senha deve conter mais de 6 caracteres</div>}
           <p>{formData?.email} / {formData?.password}</p>
-          <input type="submit" value="Entrar na conta" className="btn btn-primary mb-2 mt-4" />
+          <input type="button" value="Entrar na conta" className="btn btn-primary mb-2 mt-4" onClick={()=>createUser(formData?.email,formData?.password, navigate)}/>
         </form>
         <aside className="">Já tem uma conta? <a href="/login">Entrar</a></aside>
       </main>
     </div>
   )
+}
+
+async function createUser(email: string | undefined,password: string | undefined, navigate: NavigateFunction){
+
+  if(email != undefined && password != undefined) {
+    await fetch('http://localhost:5000/users/register',{
+    method: "POST",
+    body: JSON.stringify({email, password}),
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+    .then(()=>{
+      navigate('/profile')
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  
+  }
 }
 
 function checkEmail(

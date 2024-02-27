@@ -10,7 +10,7 @@ const userCollection = mongoose.model('users',userSchema)
 
 const postSchema = mongoose.Schema({
     userId: String,
-    description: String,
+    desc: String,
     date: Date,
     
 })
