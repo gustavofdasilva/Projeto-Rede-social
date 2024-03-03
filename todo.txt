@@ -6,3 +6,5 @@ modularizar
     fetch
     componentes - button - form - titles - etc
     format date
+Feedback no usuário com mesmo nome
+Handling senha incorreta para email criado e fazer não ir pro profile

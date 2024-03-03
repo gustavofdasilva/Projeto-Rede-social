@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 mongoose.connect('mongodb://localhost:27017/socialMedia')
 const userSchema = mongoose.Schema({
     email: String,
+    username: String,
     password: String
 })
 const userCollection = mongoose.model('users',userSchema)

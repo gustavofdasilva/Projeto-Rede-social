@@ -8,6 +8,12 @@ type Post = {
   date: Date,
 }
 
+type User = {
+  email: string,
+  username: string,
+  password: string,
+}
+
 
 const Profile = () => {
   const {state} = useLocation()
@@ -34,7 +40,7 @@ const Profile = () => {
         
         <div className="d-flex align-items-center">
           <img src="https://placehold.co/120x120" className="rounded"/>
-          <h1 className="ms-3">Olá, {data.email}!</h1>
+          <h1 className="ms-3">Olá, {data.username}!</h1>
         </div>
         <div className="d-flex flex-row align-items-center">
           <p className="fw-semibold fs-3 mt-3">Posts</p> <button className="btn btn-outline-primary ms-3" onClick={()=>{

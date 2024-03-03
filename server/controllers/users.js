@@ -37,13 +37,12 @@ const getUser = (req,res) =>{
 }
 
 const createUser = (req,res) =>{
-    const {email,password} = req.body;
-    console.log(req.body)
-    console.log(req.files)
+    const {email,username,password} = req.body;
 
     const createUser = async () => {
         await database.userCollection.create({
             email,
+            username,
             password
         })
     }
@@ -52,7 +51,7 @@ const createUser = (req,res) =>{
         .then(()=>{
             res.status(201)
                 .set('Content-Type', 'application/json')
-                .json({sucess: true, message: `User of email ${email} was created`})
+                .json({sucess: true, message: `User of name ${username} was created`})
         })
         .catch(()=>{
             res.status(400)

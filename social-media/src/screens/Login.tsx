@@ -3,6 +3,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom"
 
 type Form = {
   email: string,
+  username: string,
   password: string,
 }
 
@@ -17,14 +18,18 @@ const Login = () => {
       <main className="bg-light p-5 rounded flex-row w-25 mx-auto">
         <h1 className="fs-2 mb-4">Login</h1>
         <form action="/" method="GET" className="d-flex flex-column ">
+
           <label htmlFor="email" className="form-label">Email</label>
-          <input type="email" name="email" id="email" className={`mb-4 form-control`} required onChange={(value)=>{setFormData({email: value.target.value, password: formData?.password ?? ''})}}/>
+          <input type="email" name="email" id="email" className={`mb-4 form-control`} required onChange={(value)=>{setFormData({email: value.target.value, password: formData?.password ?? '', username: formData?.username ?? ''})}}/>
+
           <label htmlFor="password" className="form-label">Senha</label>
-          <input type="password" name="password" id="password" className={`mb-2 form-control`} required onChange={(value)=>{setFormData({email: formData?.email ?? '', password: value.target.value})}}/>
+          <input type="password" name="password" id="password" className={`mb-2 form-control`} required onChange={(value)=>{setFormData({email: formData?.email ?? '', password: value.target.value, username: formData?.username ?? ''})}}/>
+
           <input type="button" value="Entrar na conta" className="btn btn-primary mb-2 mt-4" onClick={()=>{
             fetchUser(formData?.email,formData?.password, navigate)
             console.log("Clicou")
           }}/>
+          
           <a href="/profile">Perfil</a>
         </form>
         <aside className="">Não tem uma conta? <a href="/register">Cadastrar</a></aside>
