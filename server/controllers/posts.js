@@ -25,9 +25,9 @@ const getUserPosts = (req,res) =>{
 }
 
 const createPost = (req,res) => {
-    const {userId, desc, date} = req.body
+    const {userId, username, desc, date} = req.body
     const createPostDb = async () =>{
-        await database.postCollection.create({userId,desc,date})
+        await database.postCollection.create({userId,username,desc,date})
     }
 
     createPostDb()

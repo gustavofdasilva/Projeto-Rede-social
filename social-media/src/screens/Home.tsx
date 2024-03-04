@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 type Post = {
   _id: string | undefined,
   userId: string,
+  username: string,
   desc: string,
   date: Date,
 }
@@ -25,7 +26,7 @@ const Home = () => {
         <SendPost/>
         {posts.map((post)=>{
           return(
-            <Post userName={post.userId} postData={new Date(post.date)} desc={post.desc} key={post._id}/>
+            <Post userName={post.username} postData={new Date(post.date)} desc={post.desc} key={post._id}/>
           )
         })}
         </main>

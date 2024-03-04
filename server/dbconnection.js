@@ -11,6 +11,7 @@ const userCollection = mongoose.model('users',userSchema)
 
 const postSchema = mongoose.Schema({
     userId: String,
+    username: String,
     desc: String,
     date: Date,
     

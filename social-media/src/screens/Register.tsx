@@ -55,21 +55,18 @@ async function createUser(email: string | undefined, password: string | undefine
 
   if((email != undefined && password != undefined && username != undefined) &&
     (emailCheck && passwordCheck && usernameCheck)) {
-    await fetch('http://localhost:5000/users/register',{
-      method: "POST",
-      body: JSON.stringify({email, username, password}),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    .then((result)=>{
-      const data = result.json()
-      navigate('/profile',{state:{data}})
-    })
-    .catch(err=>{
-      console.log(err)
-    })
-  
+    const response =  await fetch('http://localhost:5000/users/register',{
+        method: "POST",
+        body: JSON.stringify({email, username, password}),
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })  
+    const data = await response.json()
+
+    console.log('DATA:',data)
+    
+    navigate('/profile',{state:{data}})
   }
 }
 

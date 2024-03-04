@@ -36,7 +36,7 @@ const getUser = (req,res) =>{
         })
 }
 
-const createUser = (req,res) =>{
+const createUser = async (req,res) =>{
     const {email,username,password} = req.body;
 
     const createUser = async () => {
@@ -45,13 +45,18 @@ const createUser = (req,res) =>{
             username,
             password
         })
+
+        return await database.userCollection.findOne({
+            username
+        })
     }
 
     createUser()
-        .then(()=>{
+        .then((response)=>{
+            console.log(response)
             res.status(201)
                 .set('Content-Type', 'application/json')
-                .json({sucess: true, message: `User of name ${username} was created`})
+                .json(response)
         })
         .catch(()=>{
             res.status(400)

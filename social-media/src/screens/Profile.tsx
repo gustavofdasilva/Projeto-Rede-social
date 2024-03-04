@@ -4,16 +4,10 @@ import { useLocation } from "react-router-dom"
 type Post = {
   _id: string | undefined,
   userId: string,
+  username: string,
   desc: string,
   date: Date,
 }
-
-type User = {
-  email: string,
-  username: string,
-  password: string,
-}
-
 
 const Profile = () => {
   const {state} = useLocation()
@@ -21,6 +15,7 @@ const Profile = () => {
   const [createPost,setCreatePost] = useState<Post>({
     _id: undefined,
     userId: data._id,
+    username: data.username,
     desc: '',
     date: new Date()
   })
@@ -30,6 +25,7 @@ const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(()=>{
+    console.log('userId:',data._id)
     getAllUserPosts(data._id,setPostData, setLoading)
   },[])
 
@@ -43,8 +39,16 @@ const Profile = () => {
           <h1 className="ms-3">Olá, {data.username}!</h1>
         </div>
         <div className="d-flex flex-row align-items-center">
-          <p className="fw-semibold fs-3 mt-3">Posts</p> <button className="btn btn-outline-primary ms-3" onClick={()=>{
-            createPostFunc(createPost.userId,createPost.desc,createPost.date)}}>Novo post</button>
+          <p className="fw-semibold fs-3 mt-3">Posts</p> <button className="btn btn-outline-primary ms-3" 
+            onClick={()=>{
+            createPostFunc(data._id, data.username,createPost.desc,createPost.date)
+            window.location.reload()
+            }}>Novo post</button>
+            <input type="text" name="desc" id="desc" className="input-group-text" onChange={(value)=>{setCreatePost({
+              ...createPost,
+              desc: value.target.value
+            })
+            }}/>
         </div>
         <div>
           
@@ -76,11 +80,11 @@ function formatDate(date: Date) {
   return `${day}/${month}/${year}`
 }
 
-async function createPostFunc(userId: string, desc: string, date: Date){
+async function createPostFunc(userId: string, username: string, desc: string, date: Date){
   if(desc != '') {
     const response = await fetch('http://localhost:5000/posts/createPost', {
       method: "POST",
-      body: JSON.stringify({userId,desc,date}),
+      body: JSON.stringify({userId, username,desc,date}),
       headers: {
         'Content-Type': 'application/json',
       }
@@ -89,12 +93,15 @@ async function createPostFunc(userId: string, desc: string, date: Date){
   
     console.log(data)
   } else {
-    //handle campo vazio
+    console.log('campo vazio!')
   }
   
 }
 
-async function getAllUserPosts(userId: string, setPosts:React.Dispatch<React.SetStateAction<Post[]>>, setLoading:React.Dispatch<React.SetStateAction<boolean>>) {
+async function getAllUserPosts(
+  userId: string, 
+  setPosts:React.Dispatch<React.SetStateAction<Post[]>>, 
+  setLoading:React.Dispatch<React.SetStateAction<boolean>>) {
   console.log(userId)
   const response = await fetch('http://localhost:5000/posts/getUserPosts',{
     method:'POST',

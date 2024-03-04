@@ -11,7 +11,7 @@ const Post = (props: Props) => {
     <section className='p-3 bg-light m-3'>
       <div className='d-flex align-items-center mb-4'>
         <img src="https://placehold.co/120x120" alt="#" width={60}/>
-        <p className='ms-2'>{props.userName} - {props.postData.getTime()}</p>
+        <p className='ms-2'>{props.userName} - {props.postData.getDate()}</p>
       </div>
       <p>{props.desc}</p>
       <img src="https://placehold.co/600x400" alt="#" className='w-100'/>
