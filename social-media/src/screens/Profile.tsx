@@ -5,6 +5,7 @@ type Post = {
   _id: string | undefined,
   userId: string,
   username: string,
+  //Imagem do perfil
   desc: string,
   date: Date,
 }
@@ -21,7 +22,7 @@ const Profile = () => {
   })
 
   const [postData, setPostData] = useState<Post[]>([])
-
+  const [imgPreview,setImgPreview] = useState<string | ArrayBuffer>()
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(()=>{
@@ -35,8 +36,12 @@ const Profile = () => {
       <main className="mx-auto bg-light my-auto p-5 rounded w-75 h-75 d-flex flex-column">
         
         <div className="d-flex align-items-center">
-          <img src="https://placehold.co/120x120" className="rounded"/>
+          <img src={imgPreview ?? "https://placehold.co/120x120"} className="rounded"/>
           <h1 className="ms-3">Olá, {data.username}!</h1>
+          <input className="form-control" type="file" name="profileImage" id="profileImage" onChange={async (value)=>{
+            const image = await convertTo64(value.target.files[0])
+            console.log(image)
+          }}/>
         </div>
         <div className="d-flex flex-row align-items-center">
           <p className="fw-semibold fs-3 mt-3">Posts</p> <button className="btn btn-outline-primary ms-3" 
@@ -84,7 +89,7 @@ async function createPostFunc(userId: string, username: string, desc: string, da
   if(desc != '') {
     const response = await fetch('http://localhost:5000/posts/createPost', {
       method: "POST",
-      body: JSON.stringify({userId, username,desc,date}),
+      body: JSON.stringify({userId, username,desc,date/*Imagem do post*/}),
       headers: {
         'Content-Type': 'application/json',
       }
@@ -114,6 +119,19 @@ async function getAllUserPosts(
   console.log(data)
   setPosts(data)
   setLoading(false)
+}
+
+async function convertTo64(file: any){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      resolve(reader.result)
+    }
+    reader.onerror = (error) => {
+      reject(error)
+    }
+  })
 }
 
 export default Profile

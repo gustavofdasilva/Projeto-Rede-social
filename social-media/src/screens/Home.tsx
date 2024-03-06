@@ -20,15 +20,15 @@ const Home = () => {
   },[])
 
   return (
-    <div className='d-flex row justify-content-center '>
+    <div className='d-flex flex-column align-items-center'>
         <Navbar/>
-        <main className='w-50 bg-secondary center'>
+        <main className='bg-secondary'>
         <SendPost/>
-        {posts.map((post)=>{
+        {!loading ? posts.map((post)=>{
           return(
             <Post userName={post.username} postData={new Date(post.date)} desc={post.desc} key={post._id}/>
           )
-        })}
+        }): <p className='text-light fs-4'>Carregando...</p>}
         </main>
     </div>
   )
@@ -40,9 +40,9 @@ async function getPosts(setPosts:React.Dispatch<React.SetStateAction<Post[]>>, s
       'Content-Type': 'application/json',
     }
   })
-  const data = await response.json()
+  const data:[] = await response.json()
   console.log(data)
-  setPosts(data)
+  setPosts(data.reverse())
   console.log(data)
   setLoading(false)
 }

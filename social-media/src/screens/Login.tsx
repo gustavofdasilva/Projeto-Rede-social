@@ -29,8 +29,6 @@ const Login = () => {
             fetchUser(formData?.email,formData?.password, navigate)
             console.log("Clicou")
           }}/>
-          
-          <a href="/profile">Perfil</a>
         </form>
         <aside className="">Não tem uma conta? <a href="/register">Cadastrar</a></aside>
       </main>
