@@ -11,3 +11,5 @@ Handling senha incorreta para email criado e fazer não ir pro profile
 Refatorar o código
     Arquivo profile 
         O que não vai ser alterado no create post deixa pegando da data
+
+Modularizar funções HandleEvents no código

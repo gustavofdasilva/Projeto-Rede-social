@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
+import CroppedImage from "../components/CroppedImage"
 
 type Post = {
   _id: string | undefined,
@@ -25,10 +26,11 @@ const Profile = () => {
   const [imgPreview,setImgPreview] = useState<string | ArrayBuffer>()
   const [loading, setLoading] = useState<boolean>(true)
 
+
   useEffect(()=>{
     console.log('userId:',data._id)
     getAllUserPosts(data._id,setPostData, setLoading)
-  },[])
+  },[data._id])
 
   return (
     <div className="d-flex vw-100 vh-100 bg-dark justify-content-center aligm-items-center">
@@ -36,11 +38,15 @@ const Profile = () => {
       <main className="mx-auto bg-light my-auto p-5 rounded w-75 h-75 d-flex flex-column">
         
         <div className="d-flex align-items-center">
-          <img src={imgPreview ?? "https://placehold.co/120x120"} className="rounded"/>
+          <CroppedImage width={200} height={150} filePath={imgPreview}/>
           <h1 className="ms-3">Olá, {data.username}!</h1>
-          <input className="form-control" type="file" name="profileImage" id="profileImage" onChange={async (value)=>{
-            const image = await convertTo64(value.target.files[0])
-            console.log(image)
+          <input className="form-control w-25" type="file" accept=".png, .jpg, .jpeg"name="profileImage" id="profileImage" onChange={async (value)=>{
+            const file = value.target.files
+            if(file !== null) {
+              const image:string = await convertTo64(file[0])
+              setImgPreview(image)
+              console.log(image)
+            }
           }}/>
         </div>
         <div className="d-flex flex-row align-items-center">
@@ -121,12 +127,14 @@ async function getAllUserPosts(
   setLoading(false)
 }
 
-async function convertTo64(file: any){
+async function convertTo64(file: Blob): Promise<string>{
   return new Promise((resolve,reject)=>{
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onload = () => {
-      resolve(reader.result)
+      if(typeof reader.result == 'string') {
+        resolve(reader.result)
+      }
     }
     reader.onerror = (error) => {
       reject(error)
