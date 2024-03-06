@@ -13,3 +13,4 @@ Refatorar o código
         O que não vai ser alterado no create post deixa pegando da data
 
 Modularizar funções HandleEvents no código
+Trocar de componentes html para componentes do bootstrap
