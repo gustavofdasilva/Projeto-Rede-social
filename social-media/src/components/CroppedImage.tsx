@@ -4,6 +4,7 @@ type Props = {
     width: number,
     height: number,
     filePath: string | ArrayBuffer | undefined,
+    className?: string
 }
 
 const CroppedImage = (props:Props) => {
@@ -14,7 +15,7 @@ const CroppedImage = (props:Props) => {
         backgroundImage:`url(${props.filePath})`, 
         backgroundPosition: 'center', 
         backgroundSize: 'cover'}}
-        className='rounded'>    
+        className={`rounded ${props.className}`}>    
     </div>
   )
 }

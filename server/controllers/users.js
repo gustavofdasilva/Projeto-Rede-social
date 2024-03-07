@@ -37,10 +37,11 @@ const getUser = (req,res) =>{
 }
 
 const createUser = async (req,res) =>{
-    const {email,username,password} = req.body;
+    const {email,img,username,password} = req.body;
 
     const createUser = async () => {
         await database.userCollection.create({
+            img,
             email,
             username,
             password
@@ -64,6 +65,33 @@ const createUser = async (req,res) =>{
         })
 }
 
+const updateUser = (req,res) =>{
+    const {_id,username,img} = req.body;
+    res.setHeader({
+        "Acess-Control-Allow-Methods":"PUT",
+    })
+    req.setHeader({
+        "Acess-Control-Allow-Methods":"PUT",
+    })
+    const update = async () => {
+        await database.userCollection.updateOne(
+            {_id},
+            {username, img}
+        )
+    }
+
+    update()
+        .then(()=>{
+            res.status(204)
+                .json({sucess:true, message:'user was sucessfully updated'})
+        })
+        .catch((err)=>{
+            res.status(400)
+                .json({sucess:false, message:'unable to update user'})
+        })
+
+}
+
 const deleteUser = (req,res) =>{
     //Delete all the posts created by the user
     const {id} = req.params
@@ -85,6 +113,7 @@ const deleteUser = (req,res) =>{
 module.exports = {
     createUser,
     deleteUser,
+    updateUser,
     getAllUsers,
     getUser
 }

@@ -8,9 +8,16 @@ type Post = {
   _id: string | undefined,
   userId: string,
   username: string,
-  //Imagem do perfil
+  img: string,
   desc: string,
   date: Date,
+}
+
+type User = {
+  _id: string,
+  username: string,
+  password: string,
+  img: string,
 }
 
 const Profile = () => {
@@ -20,26 +27,46 @@ const Profile = () => {
     _id: undefined,
     userId: data._id,
     username: data.username,
+    img:'',
     desc: '',
     date: new Date()
   })
 
+  const [user,setUser] = useState<User>({
+    _id:'',
+    username:'',
+    password:'',
+    img:'',
+  })
   const [postData, setPostData] = useState<Post[]>([])
   const [imgPreview,setImgPreview] = useState<string | ArrayBuffer>()
+  const [postImg,setPostImg] = useState<string | ArrayBuffer>()
   const [loading, setLoading] = useState<boolean>(true)
 
-  const inputFile = useRef<HTMLInputElement | null>(null); //inputFile.current?.click()
+  const inputFileUpdateProfile = useRef<HTMLInputElement | null>(null); //inputFileUpdateProfile.current?.click()
+  const inputFileNewPost = useRef<HTMLInputElement | null>(null); //inputFileUpdateProfile.current?.click()
 
   const [showUpdateProfile, setShowUpdateProfile] = useState(false);
     const handleOpenUpdateProfile = () => setShowUpdateProfile(true);
     const handleCloseUpdateProfile = () => setShowUpdateProfile(false)
 
+  const [showNewPost, setShowNewPost] = useState(false);
+    const handleOpenNewPost = () => setShowNewPost(true);
+    const handleCloseNewPost = () => setShowNewPost(false)
 
+  const [newName,setNewName] = useState<string>('')
 
   useEffect(()=>{
     console.log('userId:',data._id)
     getAllUserPosts(data._id,setPostData, setLoading)
   },[data._id])
+
+  useEffect(()=>{
+    getUser(data.email,data.password)
+    .then((resolve):void=>{
+      setUser(resolve)
+    })
+  },[data.email,data.password])
 
   return (
     <div className="d-flex vw-100 vh-100 bg-dark justify-content-center aligm-items-center">
@@ -51,7 +78,7 @@ const Profile = () => {
 
         <div className="d-flex align-items-center">
           <CroppedImage width={200} height={150} filePath={imgPreview}/>
-          <h1 className="ms-3">Olá, {data.username}!</h1>
+          <h1 className="ms-3">Olá, {user.username}!</h1>
         </div>
 
         <div className="d-flex flex-row align-items-center">
@@ -59,21 +86,12 @@ const Profile = () => {
           <button 
             className="btn btn-outline-primary ms-3" 
             onClick={()=>{
-            createPostFunc(data._id, data.username,createPost.desc,createPost.date)
-            window.location.reload()
+            handleOpenNewPost()
             }}>
               Novo post
           </button>
 
-          <input type="text" name="desc" id="desc" className="input-group-text" onChange={(value)=>{setCreatePost({
-              ...createPost,
-              desc: value.target.value
-            })
-          }}/>
-        </div>
-
-        <div>  
-          <p>{createPost.desc}</p>
+          
         </div>
 
         <div className={`w-100 h-100 d-flex flex-column border rounded overflow-auto ${(loading || postData?.length == 0)?'justify-content-center align-items-center':''}`}>
@@ -99,22 +117,58 @@ const Profile = () => {
         <Modal.Body className="p-4 d-flex flex-column">
           <div className="d-flex flex-row mb-3 mt-3">
             <p className="m-0 me-4 fs-5">Nome: </p>
-            <input type="text" name="text" id="text" className="input-group-text"/>
+            <input type="text" name="text" id="text" className="input-group-text" onChange={(value)=>{
+              setNewName(value.target.value)
+            }}/>
           </div>
-          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFile.current?.click()}}> Alterar foto de perfil</Button>
+          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFileUpdateProfile.current?.click()}}> Alterar foto de perfil</Button>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-center">
+          <Button onClick={()=>{
+            updateProfile(user._id, newName, imgPreview)
+              .then(()=>{
+                window.location.reload()
+              })
+          }}>Salvar mudanças</Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showNewPost} onHide={handleCloseNewPost} className="d-flex justify-content-center align-items-center"> {/*New Post*/}
+        <Modal.Header closeButton>
+          <Modal.Title>Alterar perfil</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4 d-flex flex-column">
+          <div className="d-flex flex-row mb-3 mt-3">
+            <p className="m-0 me-4 fs-5">Descrição: </p>
+            <textarea name="desc" id="desc" cols={30} rows={5} className="input-group-text text-start" onChange={(value)=>{setCreatePost({
+                ...createPost,
+                desc: value.target.value
+              })
+            }}>
+            </textarea>
+          </div>
+          {postImg && <CroppedImage width={200} height={200} filePath={postImg} className="align-self-center"/>}
+          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFileNewPost.current?.click()}}>Inserir foto no post</Button>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-center">
           <Button onClick={()=>{updateProfile()}}>Salvar mudanças</Button>
         </Modal.Footer>
       </Modal>
       
-      <input style={{display:"none"}} ref={inputFile} type="file" accept=".png, .jpg, .jpeg"name="profileImage" id="profileImage" onChange={async (value)=>{
+      <input style={{display:"none"}} ref={inputFileUpdateProfile} type="file" accept=".png, .jpg, .jpeg"name="profileImage" id="profileImage" onChange={async (value)=>{
           const file = value.target.files
           if(file !== null) {
             const image:string = await convertTo64(file[0])
             setImgPreview(image)
-            console.log(image)
           }
+      }}/>
+
+      <input style={{display:"none"}} ref={inputFileNewPost} type="file" accept=".png, .jpg, .jpeg"name="profileImage" id="profileImage" onChange={async (value)=>{
+        const file = value.target.files
+        if(file !== null) {
+          const image:string = await convertTo64(file[0])
+          setPostImg(image)
+        }
       }}/>
     </div>
   )
@@ -128,18 +182,16 @@ function formatDate(date: Date) {
   return `${day}/${month}/${year}`
 }
 
-async function createPostFunc(userId: string, username: string, desc: string, date: Date){
+async function createPostFunc(userId: string, username: string, desc: string, date: Date, img:string){
   if(desc != '') {
     const response = await fetch('http://localhost:5000/posts/createPost', {
       method: "POST",
-      body: JSON.stringify({userId, username,desc,date/*Imagem do post*/}),
+      body: JSON.stringify({userId, username,desc,date,img}),
       headers: {
         'Content-Type': 'application/json',
       }
     })
     const data = await response.json()
-  
-    console.log(data)
   } else {
     console.log('campo vazio!')
   }
@@ -179,14 +231,33 @@ async function convertTo64(file: Blob): Promise<string>{
   })
 }
 
-async function updateProfile(newName: string, newImgProfile: string) {
+async function updateProfile(_id: string, newName: string, newImgProfile: string | ArrayBuffer | undefined) {
   const name = newName ?? null
-  const image = newImgProfile ?? null
+  const img = newImgProfile ?? null
 
-  //Fazer função de update no backend
-  
-  console.log('Change this infos!')
-  window.location.reload()
+  const response = await fetch('http://localhost:5000/users/updateUser',{    
+    method: 'PUT',
+    body:JSON.stringify({_id,name,img}),
+    headers:{
+      'Access-Control-Allow-Methods': 'GET, POST, PUT'
+    }
+  })
+
+  return await response.json()
+}
+
+async function getUser(email: string, password: string): Promise<User>{
+  const response = await fetch('http://localhost:5000/users/profile',{
+    method:'POST',
+    body: JSON.stringify({email,password}),
+    headers: {
+      'Content-type':'application/json'
+    }
+  })
+
+  const data = await response.json()
+
+  return data
 }
 
 export default Profile
