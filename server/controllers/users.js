@@ -36,7 +36,7 @@ const getUser = (req,res) =>{
         })
 }
 
-const createUser = async (req,res) =>{
+const createUser = (req,res) =>{
     const {email,img,username,password} = req.body;
 
     const createUser = async () => {
@@ -67,12 +67,7 @@ const createUser = async (req,res) =>{
 
 const updateUser = (req,res) =>{
     const {_id,username,img} = req.body;
-    res.setHeader({
-        "Acess-Control-Allow-Methods":"PUT",
-    })
-    req.setHeader({
-        "Acess-Control-Allow-Methods":"PUT",
-    })
+
     const update = async () => {
         await database.userCollection.updateOne(
             {_id},

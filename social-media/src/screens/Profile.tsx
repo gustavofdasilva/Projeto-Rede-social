@@ -118,7 +118,7 @@ const Profile = () => {
           <div className="d-flex flex-row mb-3 mt-3">
             <p className="m-0 me-4 fs-5">Nome: </p>
             <input type="text" name="text" id="text" className="input-group-text" onChange={(value)=>{
-              setNewName(value.target.value)
+              setNewName(value.target.value) 
             }}/>
           </div>
           <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFileUpdateProfile.current?.click()}}> Alterar foto de perfil</Button>
@@ -232,18 +232,23 @@ async function convertTo64(file: Blob): Promise<string>{
 }
 
 async function updateProfile(_id: string, newName: string, newImgProfile: string | ArrayBuffer | undefined) {
-  const name = newName ?? null
-  const img = newImgProfile ?? null
+  
+  const username = newName != '' ? newName : null
+  const img = newImgProfile != '' ? newImgProfile : null
 
-  const response = await fetch('http://localhost:5000/users/updateUser',{    
+  console.log(username)
+  
+  await fetch('http://localhost:5000/users/updateUser',{    
     method: 'PUT',
-    body:JSON.stringify({_id,name,img}),
-    headers:{
-      'Access-Control-Allow-Methods': 'GET, POST, PUT'
+    body:JSON.stringify({_id:_id,username:username,img:img}),
+    headers: {
+      'Content-Type': 'application/json',
     }
   })
 
-  return await response.json()
+  .then(()=>{
+    return
+  })
 }
 
 async function getUser(email: string, password: string): Promise<User>{
