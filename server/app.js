@@ -5,8 +5,8 @@ const usersRoute = require('./routes/users')
 const postRoute = require('./routes/posts')
 const bodyParser = require('body-parser')
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json({limit: '50mb'}))
+app.use(bodyParser.urlencoded({ extended: true}))
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
@@ -17,7 +17,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(bodyParser({limit: '50mb'}));
 app.use('/users',usersRoute)
 app.use('/posts',postRoute)
 

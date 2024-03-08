@@ -6,9 +6,20 @@ import { useEffect, useState } from 'react'
 type Post = {
   _id: string | undefined,
   userId: string,
+  userImg: string,
+  img: string,
   username: string,
   desc: string,
   date: Date,
+  email: string,
+  password: string,
+}
+
+type User = {
+  _id: string,
+  username: string,
+  password: string,
+  img: string,
 }
 
 const Home = () => {
@@ -26,9 +37,9 @@ const Home = () => {
         <SendPost/>
         {!loading ? posts.map((post)=>{
           return(
-            <Post userName={post.username} postData={new Date(post.date)} desc={post.desc} key={post._id}/>
+            <Post userName={post.username} postData={new Date(post.date)} desc={post.desc} key={post._id} img={post.img} userImg={post.userImg}/>
           )
-        }): <p className='text-light fs-4'>Carregando...</p>}
+        }): <p>Carregando...</p>}
         </main>
     </div>
   )
@@ -40,11 +51,32 @@ async function getPosts(setPosts:React.Dispatch<React.SetStateAction<Post[]>>, s
       'Content-Type': 'application/json',
     }
   })
-  const data:[] = await response.json()
-  console.log(data)
-  setPosts(data.reverse())
-  console.log(data)
+  const data:Post[] = await response.json()
+  const newData = await Promise.all(
+    data.map(async(post)=>{
+      const userImg = await getUser(post.email,post.password)
+      return {
+        ...post,
+        userImg: userImg.img
+      }
+    }).reverse()
+  )
+
+  console.log(newData)
+  setPosts(newData)
   setLoading(false)
+}
+
+async function getUser(email:string, password:string):Promise<User> {
+  const response = await fetch('http://localhost:5000/users/profile',{
+    method:"POST",
+    headers:{
+      'Content-type':'application/json'
+    },
+    body: JSON.stringify({email,password}),
+  })
+  const data = await response.json()
+  return data
 }
 
 export default Home

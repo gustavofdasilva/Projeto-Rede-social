@@ -16,7 +16,8 @@ const postSchema = mongoose.Schema({
     img: String,
     desc: String,
     date: Date,
-    
+    email: String,
+    password: String,
 })
 
 const postCollection = mongoose.model('posts',postSchema)

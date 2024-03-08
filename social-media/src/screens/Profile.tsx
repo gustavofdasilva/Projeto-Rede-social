@@ -3,11 +3,14 @@ import { useLocation } from "react-router-dom"
 import CroppedImage from "../components/CroppedImage"
 import Modal from 'react-bootstrap/Modal';
 import { Button } from "react-bootstrap";
+import defaultIcon from '../assets/default-avatar.jpg'
 
 type Post = {
   _id: string | undefined,
   userId: string,
   username: string,
+  email: string,
+  password: string,
   img: string,
   desc: string,
   date: Date,
@@ -27,6 +30,8 @@ const Profile = () => {
     _id: undefined,
     userId: data._id,
     username: data.username,
+    email: data.email,
+    password: data.password,
     img:'',
     desc: '',
     date: new Date()
@@ -65,6 +70,7 @@ const Profile = () => {
     getUser(data.email,data.password)
     .then((resolve):void=>{
       setUser(resolve)
+      console.log(resolve.img)
     })
   },[data.email,data.password])
 
@@ -77,7 +83,7 @@ const Profile = () => {
         <button className="btn btn-primary ms-4 align-self-end position-absolute" onClick={()=>{handleOpenUpdateProfile()}}>Alterar informações ✏️</button>
 
         <div className="d-flex align-items-center">
-          <CroppedImage width={200} height={150} filePath={imgPreview}/>
+          <CroppedImage width={200} height={150} filePath={checkImg(user,imgPreview,defaultIcon)}/>
           <h1 className="ms-3">Olá, {user.username}!</h1>
         </div>
 
@@ -110,6 +116,7 @@ const Profile = () => {
         
       </main>
 
+      {/*//! Check user para não ter o mesmo nome de usuário*/}
       <Modal show={showUpdateProfile} onHide={handleCloseUpdateProfile} className="d-flex justify-content-center align-items-center"> {/*Update profile*/}
         <Modal.Header closeButton>
           <Modal.Title>Alterar perfil</Modal.Title>
@@ -125,10 +132,14 @@ const Profile = () => {
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-center">
           <Button onClick={()=>{
-            updateProfile(user._id, newName, imgPreview)
+            if(newName.length>0||imgPreview!=null){
+              updateProfile(user._id, newName, imgPreview,user)
               .then(()=>{
                 window.location.reload()
               })
+            } else {
+              window.alert('Campos vazios')
+            }
           }}>Salvar mudanças</Button>
         </Modal.Footer>
       </Modal>
@@ -151,7 +162,16 @@ const Profile = () => {
           <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFileNewPost.current?.click()}}>Inserir foto no post</Button>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-center">
-          <Button onClick={()=>{updateProfile()}}>Salvar mudanças</Button>
+          <Button onClick={()=>{
+            if(createPost.desc != '') {
+              createPostFunc(user._id,user.username,createPost.desc,new Date(),postImg,createPost.email,createPost.password)
+              .then(()=>{
+                window.location.reload()
+              })
+            } else {
+              window.alert('Campo de descrição vazio!')
+            }
+          }}>Postar publicação</Button>
         </Modal.Footer>
       </Modal>
       
@@ -176,22 +196,21 @@ const Profile = () => {
 
 function formatDate(date: Date) {
   const day = date.getDate().toString().length==1? `0${date.getDate()}` : date.getDate()
-  const month = date.getMonth().toString().length==1? `0${date.getMonth()}` : date.getMonth()
+  const month = date.getMonth().toString().length==1? `0${date.getMonth()+1}` : date.getMonth()+1
   const year = date.getFullYear()
 
   return `${day}/${month}/${year}`
 }
 
-async function createPostFunc(userId: string, username: string, desc: string, date: Date, img:string){
+async function createPostFunc(userId: string, username: string, desc: string, date: Date, img:string | ArrayBuffer | undefined, email: string, password: string){
   if(desc != '') {
-    const response = await fetch('http://localhost:5000/posts/createPost', {
+    await fetch('http://localhost:5000/posts/createPost', {
       method: "POST",
-      body: JSON.stringify({userId, username,desc,date,img}),
+      body: JSON.stringify({userId, username,desc,date,img,email,password}),
       headers: {
         'Content-Type': 'application/json',
       }
     })
-    const data = await response.json()
   } else {
     console.log('campo vazio!')
   }
@@ -231,12 +250,11 @@ async function convertTo64(file: Blob): Promise<string>{
   })
 }
 
-async function updateProfile(_id: string, newName: string, newImgProfile: string | ArrayBuffer | undefined) {
+async function updateProfile(_id: string, newName: string, newImgProfile: string | ArrayBuffer | undefined, user: User) {
   
-  const username = newName != '' ? newName : null
-  const img = newImgProfile != '' ? newImgProfile : null
+  const username = newName != '' ? newName : user.username
+  const img = newImgProfile != '' ? newImgProfile : user.img
 
-  console.log(username)
   
   await fetch('http://localhost:5000/users/updateUser',{    
     method: 'PUT',
@@ -263,6 +281,23 @@ async function getUser(email: string, password: string): Promise<User>{
   const data = await response.json()
 
   return data
+}
+
+function checkImg(user: User, imgPreview: string | ArrayBuffer | undefined, defaultPath:string) {
+  const userImg = user.img
+  const newImg = imgPreview
+
+  if(newImg != null) {
+    return newImg
+  }
+
+  if(userImg != null) {
+    return userImg
+  }
+
+  console.log('Sem foto', defaultPath)
+
+  return defaultPath
 }
 
 export default Profile

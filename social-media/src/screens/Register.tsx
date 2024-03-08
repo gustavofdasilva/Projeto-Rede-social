@@ -10,7 +10,7 @@ type User = {
   email: string, 
   username: string,
   password: string, 
-  //Imagem
+  img:string,
 }
 
 const Register = () => {
@@ -58,7 +58,7 @@ async function createUser(email: string | undefined, password: string | undefine
     (emailCheck && passwordCheck && usernameCheck)) {
     const response =  await fetch('http://localhost:5000/users/register',{
         method: "POST",
-        body: JSON.stringify({email, username, password/*, Imagem nula*/}),
+        body: JSON.stringify({email, username, password, img:null}),
         headers: {
           'Content-Type': 'application/json',
         }
