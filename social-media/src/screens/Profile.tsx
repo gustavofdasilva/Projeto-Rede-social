@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import CroppedImage from "../components/CroppedImage"
 import Modal from 'react-bootstrap/Modal';
 import { Button } from "react-bootstrap";
@@ -8,7 +8,6 @@ import defaultIcon from '../assets/default-avatar.jpg'
 type Post = {
   _id: string | undefined,
   userId: string,
-  username: string,
   email: string,
   password: string,
   img: string,
@@ -29,7 +28,6 @@ const Profile = () => {
   const [createPost,setCreatePost] = useState<Post>({
     _id: undefined,
     userId: data._id,
-    username: data.username,
     email: data.email,
     password: data.password,
     img:'',
@@ -61,6 +59,8 @@ const Profile = () => {
 
   const [newName,setNewName] = useState<string>('')
 
+  const navigate = useNavigate()
+
   useEffect(()=>{
     console.log('userId:',data._id)
     getAllUserPosts(data._id,setPostData, setLoading)
@@ -77,6 +77,12 @@ const Profile = () => {
   return (
     <div className="d-flex vw-100 vh-100 bg-dark justify-content-center aligm-items-center">
     <a href="/" className="btn btn-outline-secondary position-absolute top-0 start-0 m-3">Página inicial</a>
+    <button onClick={()=>{
+      deleteCookie('username')
+      deleteCookie('email')
+      deleteCookie('password')
+      navigate('/')
+    }} className="btn btn-outline-secondary position-absolute top-0 end-0 m-3">Sair da conta</button>
 
       <main className="mx-auto bg-light my-auto p-5 rounded w-75 h-75 d-flex flex-column">
 
@@ -106,10 +112,10 @@ const Profile = () => {
             return(
               <div className="border w-100 p-2 d-flex justify-content-between" key={post._id}> 
                 <p className="d-flex my-auto">{post.desc} - {formatDate(new Date(post.date))} </p>
-                <button className="btn btn-primary">Acessar post</button>
+                <button className="btn btn-outline-danger">Apagar post</button>
               </div>
             )
-          })}
+          }).reverse()}
           {loading && <p>Carregando...</p>}
           {(!loading && postData?.length == 0) && <aside>Nenhum post encontrado, Comece a postar!</aside>}
         </div>
@@ -146,7 +152,7 @@ const Profile = () => {
 
       <Modal show={showNewPost} onHide={handleCloseNewPost} className="d-flex justify-content-center align-items-center"> {/*New Post*/}
         <Modal.Header closeButton>
-          <Modal.Title>Alterar perfil</Modal.Title>
+          <Modal.Title>Novo post</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-4 d-flex flex-column">
           <div className="d-flex flex-row mb-3 mt-3">
@@ -206,7 +212,7 @@ async function createPostFunc(userId: string, username: string, desc: string, da
   if(desc != '') {
     await fetch('http://localhost:5000/posts/createPost', {
       method: "POST",
-      body: JSON.stringify({userId, username,desc,date,img,email,password}),
+      body: JSON.stringify({userId,desc,date,img,email,password}),
       headers: {
         'Content-Type': 'application/json',
       }
@@ -298,6 +304,10 @@ function checkImg(user: User, imgPreview: string | ArrayBuffer | undefined, defa
   console.log('Sem foto', defaultPath)
 
   return defaultPath
+}
+
+function deleteCookie(name:string){
+  document.cookie=`${name}=null`
 }
 
 export default Profile

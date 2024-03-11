@@ -48,6 +48,10 @@ async function fetchUser(email: string | undefined, password: string | undefined
       }
     })
     const data = await response.json()
+    
+    document.cookie=`username=${data.username}`
+    document.cookie=`email=${data.email}`
+    document.cookie=`password=${data.password}`
     navigate('/profile',{state:{data}})
     } catch (error) {
       console.log(error)

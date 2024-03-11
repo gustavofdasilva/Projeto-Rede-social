@@ -18,3 +18,5 @@ Reorganizar nomes e função das variaveis
 Check dos formularios no backend
 fazer sistema de cache
 fazer com que o nome não fique guardado no post e inclua esse nome igual o get user para a imagem do usuário
+Apagar post 
+Marcar posts que são do usuario na tela home

@@ -66,7 +66,10 @@ async function createUser(email: string | undefined, password: string | undefine
     const data = await response.json()
 
     console.log('DATA:',data)
-    
+
+    document.cookie=`username=${data.username}`
+    document.cookie=`email=${data.email}`
+    document.cookie=`password=${data.password}`
     navigate('/profile',{state:{data}})
   }
 }
