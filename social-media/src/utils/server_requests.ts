@@ -128,3 +128,13 @@ export async function updateProfile(
       return
     })
 }
+
+export async function deletePost(id:string) {
+  await fetch('http://localhost:5000/posts/deletePost',{
+    method:"DELETE",
+    headers:{
+      'Content-type':'application/json'
+    },
+    body:JSON.stringify({id}),
+  })
+}

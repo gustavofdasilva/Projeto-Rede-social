@@ -12,7 +12,6 @@ const getPosts = (req,res) => {
 
 const getUserPosts = (req,res) =>{
     const {userId} = req.body
-    console.log(userId)
     database.postCollection.find({userId})
         .then(posts=>{
             res.status(200)
@@ -26,7 +25,6 @@ const getUserPosts = (req,res) =>{
 
 const createPost = (req,res) => {
     const {userId, desc, date, img, email, password} = req.body
-    console.log(img)
     const createPostDb = async () =>{
         await database.postCollection.create({userId,img,desc,date,email,password})
     }
@@ -44,7 +42,21 @@ const createPost = (req,res) => {
 }
 
 const deletePost = (req,res) => {
-    res.send('Delete post!')
+    const {id} = req.body
+    console.log(id)
+    const deletePost = async () => {
+        await database.postCollection.deleteOne({_id: id})
+    }
+
+    deletePost()
+        .then(()=>{
+            res.status(200)
+                .json({sucess:true, message: `User of id ${id} was deleted`})
+        })
+        .catch(()=>{
+            res.status(404)
+                .json({sucess: false, message: 'User not found'})
+        })
 }
 
 module.exports = {

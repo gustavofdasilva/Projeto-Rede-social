@@ -4,6 +4,7 @@ import CroppedImage from "../components/CroppedImage"
 import Modal from 'react-bootstrap/Modal';
 import { Button } from "react-bootstrap";
 import defaultIcon from '../assets/default-avatar.jpg'
+import { deletePost } from "../utils/server_requests";
 
 type Post = {
   _id: string | undefined,
@@ -112,7 +113,13 @@ const Profile = () => {
             return(
               <div className="border w-100 p-2 d-flex justify-content-between" key={post._id}> 
                 <p className="d-flex my-auto">{post.desc} - {formatDate(new Date(post.date))} </p>
-                <button className="btn btn-outline-danger">Apagar post</button>
+                <button className="btn btn-outline-danger" onClick={()=>{
+                  //! Fazer tela de confirmação
+                  deletePost(post._id ?? '')
+                    .then(()=>{
+                      window.location.reload()
+                    })
+                }}>Apagar post</button>
               </div>
             )
           }).reverse()}

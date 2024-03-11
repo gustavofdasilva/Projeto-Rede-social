@@ -21,7 +21,6 @@ const getUser = (req,res) =>{
     database.userCollection.findOne({email: email})
         .then(user=>{
             if(user.password === password) {
-                console.log(user.password)
                 res.status(200)
                     .json(user)
             } else {
@@ -54,7 +53,6 @@ const createUser = (req,res) =>{
 
     createUser()
         .then((response)=>{
-            console.log(response)
             res.status(201)
                 .set('Content-Type', 'application/json')
                 .json(response)
