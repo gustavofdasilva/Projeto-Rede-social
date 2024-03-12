@@ -4,29 +4,15 @@ import CroppedImage from "../components/CroppedImage"
 import Modal from 'react-bootstrap/Modal';
 import { Button } from "react-bootstrap";
 import defaultIcon from '../assets/default-avatar.jpg'
-import { deletePost } from "../utils/server_requests";
-
-type Post = {
-  _id: string | undefined,
-  userId: string,
-  email: string,
-  password: string,
-  img: string,
-  desc: string,
-  date: Date,
-}
-
-type User = {
-  _id: string,
-  username: string,
-  password: string,
-  img: string,
-}
+import { createPostFunc, deletePost, getAllUserPosts, getUser, updateProfile } from "../utils/server_requests";
+import { PostType, UserType } from "../utils/types";
+import { convertTo64, deleteCookie, formatDate } from "../utils/general";
+import { checkImg } from "../utils/form_check";
 
 const Profile = () => {
   const {state} = useLocation()
   const {data} = state
-  const [createPost,setCreatePost] = useState<Post>({
+  const [createPost,setCreatePost] = useState<PostType>({
     _id: undefined,
     userId: data._id,
     email: data.email,
@@ -36,13 +22,14 @@ const Profile = () => {
     date: new Date()
   })
 
-  const [user,setUser] = useState<User>({
+  const [user,setUser] = useState<UserType>({
     _id:'',
+    email:'',
     username:'',
     password:'',
     img:'',
   })
-  const [postData, setPostData] = useState<Post[]>([])
+  const [postData, setPostData] = useState<PostType[]>([])
   const [imgPreview,setImgPreview] = useState<string | ArrayBuffer>()
   const [postImg,setPostImg] = useState<string | ArrayBuffer>()
   const [loading, setLoading] = useState<boolean>(true)
@@ -57,13 +44,49 @@ const Profile = () => {
   const [showNewPost, setShowNewPost] = useState(false);
     const handleOpenNewPost = () => setShowNewPost(true);
     const handleCloseNewPost = () => setShowNewPost(false)
+  
+  const handleHomeButton = ():void => {
+    deleteCookie('username')
+    deleteCookie('email')
+    deleteCookie('password')
+    navigate('/')
+  }
+
+  const handleDeletePost = (post:PostType):void => {
+    //! Fazer tela de confirmação
+    deletePost(post._id ?? '')
+      .then(()=>{
+        window.location.reload()
+      })
+  }
+
+  const handleConfirmChangeProfile = ():void => {
+    if(newName.length>0||imgPreview!=null){
+      updateProfile(user._id, newName, imgPreview,user)
+      .then(()=>{
+        window.location.reload()
+      })
+    } else {
+      window.alert('Campos vazios')
+    }
+  }
+
+  const handleConfirmNewPost = ():void => {
+    if(createPost.desc != '') {
+      createPostFunc(user._id,createPost.desc,new Date(),postImg,createPost.email,createPost.password)
+      .then(()=>{
+        window.location.reload()
+      })
+    } else {
+      window.alert('Campo de descrição vazio!')
+    }
+  }
 
   const [newName,setNewName] = useState<string>('')
 
   const navigate = useNavigate()
 
   useEffect(()=>{
-    console.log('userId:',data._id)
     getAllUserPosts(data._id,setPostData, setLoading)
   },[data._id])
 
@@ -71,23 +94,17 @@ const Profile = () => {
     getUser(data.email,data.password)
     .then((resolve):void=>{
       setUser(resolve)
-      console.log(resolve.img)
     })
   },[data.email,data.password])
 
   return (
     <div className="d-flex vw-100 vh-100 bg-dark justify-content-center aligm-items-center">
     <a href="/" className="btn btn-outline-secondary position-absolute top-0 start-0 m-3">Página inicial</a>
-    <button onClick={()=>{
-      deleteCookie('username')
-      deleteCookie('email')
-      deleteCookie('password')
-      navigate('/')
-    }} className="btn btn-outline-secondary position-absolute top-0 end-0 m-3">Sair da conta</button>
+    <button onClick={handleHomeButton} className="btn btn-outline-secondary position-absolute top-0 end-0 m-3">Sair da conta</button>
 
       <main className="mx-auto bg-light my-auto p-5 rounded w-75 h-75 d-flex flex-column">
 
-        <button className="btn btn-primary ms-4 align-self-end position-absolute" onClick={()=>{handleOpenUpdateProfile()}}>Alterar informações ✏️</button>
+        <button className="btn btn-primary ms-4 align-self-end position-absolute" onClick={handleOpenUpdateProfile}>Alterar informações ✏️</button>
 
         <div className="d-flex align-items-center">
           <CroppedImage width={200} height={150} filePath={checkImg(user,imgPreview,defaultIcon)}/>
@@ -96,30 +113,18 @@ const Profile = () => {
 
         <div className="d-flex flex-row align-items-center">
           <p className="fw-semibold fs-3 mt-3">Posts</p> 
-          <button 
-            className="btn btn-outline-primary ms-3" 
-            onClick={()=>{
-            handleOpenNewPost()
-            }}>
+          <button className="btn btn-outline-primary ms-3" onClick={handleOpenNewPost}>
               Novo post
           </button>
 
-          
         </div>
 
         <div className={`w-100 h-100 d-flex flex-column border rounded overflow-auto ${(loading || postData?.length == 0)?'justify-content-center align-items-center':''}`}>
-          {!loading && postData.map((post)=>{
-            console.log(post) //Colocar 3 pontos depois de ficar muito grande a descrição
+          {!loading && postData.map((post)=>{ //Colocar 3 pontos depois de ficar muito grande a descrição
             return(
               <div className="border w-100 p-2 d-flex justify-content-between" key={post._id}> 
                 <p className="d-flex my-auto">{post.desc} - {formatDate(new Date(post.date))} </p>
-                <button className="btn btn-outline-danger" onClick={()=>{
-                  //! Fazer tela de confirmação
-                  deletePost(post._id ?? '')
-                    .then(()=>{
-                      window.location.reload()
-                    })
-                }}>Apagar post</button>
+                <button className="btn btn-outline-danger" onClick={()=>handleDeletePost(post)}>Apagar post</button>
               </div>
             )
           }).reverse()}
@@ -141,19 +146,10 @@ const Profile = () => {
               setNewName(value.target.value) 
             }}/>
           </div>
-          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFileUpdateProfile.current?.click()}}> Alterar foto de perfil</Button>
+          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>inputFileUpdateProfile.current?.click()}> Alterar foto de perfil</Button>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-center">
-          <Button onClick={()=>{
-            if(newName.length>0||imgPreview!=null){
-              updateProfile(user._id, newName, imgPreview,user)
-              .then(()=>{
-                window.location.reload()
-              })
-            } else {
-              window.alert('Campos vazios')
-            }
-          }}>Salvar mudanças</Button>
+          <Button onClick={handleConfirmChangeProfile}>Salvar mudanças</Button>
         </Modal.Footer>
       </Modal>
 
@@ -172,19 +168,10 @@ const Profile = () => {
             </textarea>
           </div>
           {postImg && <CroppedImage width={200} height={200} filePath={postImg} className="align-self-center"/>}
-          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFileNewPost.current?.click()}}>Inserir foto no post</Button>
+          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>inputFileNewPost.current?.click()}>Inserir foto no post</Button>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-center">
-          <Button onClick={()=>{
-            if(createPost.desc != '') {
-              createPostFunc(user._id,user.username,createPost.desc,new Date(),postImg,createPost.email,createPost.password)
-              .then(()=>{
-                window.location.reload()
-              })
-            } else {
-              window.alert('Campo de descrição vazio!')
-            }
-          }}>Postar publicação</Button>
+          <Button onClick={handleConfirmNewPost}>Postar publicação</Button>
         </Modal.Footer>
       </Modal>
       
@@ -205,116 +192,6 @@ const Profile = () => {
       }}/>
     </div>
   )
-}
-
-function formatDate(date: Date) {
-  const day = date.getDate().toString().length==1? `0${date.getDate()}` : date.getDate()
-  const month = date.getMonth().toString().length==1? `0${date.getMonth()+1}` : date.getMonth()+1
-  const year = date.getFullYear()
-
-  return `${day}/${month}/${year}`
-}
-
-async function createPostFunc(userId: string, username: string, desc: string, date: Date, img:string | ArrayBuffer | undefined, email: string, password: string){
-  if(desc != '') {
-    await fetch('http://localhost:5000/posts/createPost', {
-      method: "POST",
-      body: JSON.stringify({userId,desc,date,img,email,password}),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-  } else {
-    console.log('campo vazio!')
-  }
-  
-}
-
-async function getAllUserPosts(
-  userId: string, 
-  setPosts:React.Dispatch<React.SetStateAction<Post[]>>, 
-  setLoading:React.Dispatch<React.SetStateAction<boolean>>) {
-  console.log(userId)
-  const response = await fetch('http://localhost:5000/posts/getUserPosts',{
-    method:'POST',
-    body: JSON.stringify({userId}),
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  })
-  const data = await response.json()
-  console.log(data)
-  setPosts(data)
-  setLoading(false)
-}
-
-async function convertTo64(file: Blob): Promise<string>{
-  return new Promise((resolve,reject)=>{
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-      if(typeof reader.result == 'string') {
-        resolve(reader.result)
-      }
-    }
-    reader.onerror = (error) => {
-      reject(error)
-    }
-  })
-}
-
-async function updateProfile(_id: string, newName: string, newImgProfile: string | ArrayBuffer | undefined, user: User) {
-  
-  const username = newName != '' ? newName : user.username
-  const img = newImgProfile != '' ? newImgProfile : user.img
-
-  
-  await fetch('http://localhost:5000/users/updateUser',{    
-    method: 'PUT',
-    body:JSON.stringify({_id:_id,username:username,img:img}),
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  })
-
-  .then(()=>{
-    return
-  })
-}
-
-async function getUser(email: string, password: string): Promise<User>{
-  const response = await fetch('http://localhost:5000/users/profile',{
-    method:'POST',
-    body: JSON.stringify({email,password}),
-    headers: {
-      'Content-type':'application/json'
-    }
-  })
-
-  const data = await response.json()
-
-  return data
-}
-
-function checkImg(user: User, imgPreview: string | ArrayBuffer | undefined, defaultPath:string) {
-  const userImg = user.img
-  const newImg = imgPreview
-
-  if(newImg != null) {
-    return newImg
-  }
-
-  if(userImg != null) {
-    return userImg
-  }
-
-  console.log('Sem foto', defaultPath)
-
-  return defaultPath
-}
-
-function deleteCookie(name:string){
-  document.cookie=`${name}=null`
 }
 
 export default Profile

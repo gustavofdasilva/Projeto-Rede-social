@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import { Button, Modal } from "react-bootstrap"
 import CroppedImage from "./CroppedImage";
 import { PostType, UserType } from "../utils/types";
+import { convertTo64 } from "../utils/general";
+import { createPostFunc } from "../utils/server_requests";
 
 
 
@@ -13,8 +15,19 @@ const SendPost = (props: Props) => {
   const [showNewPost, setShowNewPost] = useState(false);
   const inputFileNewPost = useRef<HTMLInputElement | null>(null);
   const [postImg,setPostImg] = useState<string | ArrayBuffer>()
+
   const handleOpenNewPost = () => setShowNewPost(true);
-  const handleCloseNewPost = () => setShowNewPost(false)
+  const handleCloseNewPost = () => setShowNewPost(false);
+  const handleConfirmNewPost = () => {
+    if(createPost.desc != '') {
+      createPostFunc(props.user._id,createPost.desc,new Date(),postImg,createPost.email,createPost.password)
+      .then(()=>{
+        window.location.reload()
+      })
+    } else {
+      window.alert('Campo de descrição vazio!')
+    }
+  }
 
   const [createPost,setCreatePost] = useState<PostType>({
     _id: undefined,
@@ -53,16 +66,7 @@ const SendPost = (props: Props) => {
         <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>{inputFileNewPost.current?.click()}}>Inserir foto no post</Button>
       </Modal.Body>
       <Modal.Footer className="d-flex justify-content-center">
-        <Button onClick={()=>{
-          if(createPost.desc != '') {
-            createPostFunc(props.user._id,props.user.username,createPost.desc,new Date(),postImg,createPost.email,createPost.password)
-            .then(()=>{
-              window.location.reload()
-            })
-          } else {
-            window.alert('Campo de descrição vazio!')
-          }
-        }}>Postar publicação</Button>
+        <Button onClick={handleConfirmNewPost}>Postar publicação</Button>
       </Modal.Footer>
       </Modal>
 
@@ -75,36 +79,6 @@ const SendPost = (props: Props) => {
       }}/>
     </>
   )
-}
-
-async function convertTo64(file: Blob): Promise<string>{
-  return new Promise((resolve,reject)=>{
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-      if(typeof reader.result == 'string') {
-        resolve(reader.result)
-      }
-    }
-    reader.onerror = (error) => {
-      reject(error)
-    }
-  })
-}
-
-async function createPostFunc(userId: string, username: string, desc: string, date: Date, img:string | ArrayBuffer | undefined, email: string, password: string){
-  if(desc != '') {
-    await fetch('http://localhost:5000/posts/createPost', {
-      method: "POST",
-      body: JSON.stringify({userId,desc,date,img,email,password}),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-  } else {
-    console.log('campo vazio!')
-  }
-  
 }
 
 export default SendPost

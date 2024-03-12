@@ -1,4 +1,5 @@
-import { isRouteErrorResponse, useRouteError } from 'react-router-dom'
+import { useRouteError } from 'react-router-dom'
+import { checkError } from '../utils/general'
 
 
 const ErrorScreen = () => {
@@ -13,21 +14,6 @@ const ErrorScreen = () => {
       </section>
     </div>
   )
-}
-
-function checkError(error: unknown) {
-  let errorMessage: string;
-  if (isRouteErrorResponse(error)) {
-    // error is type `ErrorResponse`
-    errorMessage = error.statusText;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
-  } else if (typeof error === 'string') {
-    errorMessage = error;
-  } else {
-    errorMessage = 'Unknown error';
-  }
-  return errorMessage
 }
 
 export default ErrorScreen

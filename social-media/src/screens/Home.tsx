@@ -28,7 +28,7 @@ const Home = () => {
     <div className='d-flex flex-column align-items-center'>
         <Navbar
         user={user ?? {}}/>
-        <main className='bg-secondary-subtle'>
+        <main className='bg-secondary-subtle w-50'>
         { (JSON.stringify(user) != '{}' && user)&& <SendPost user={user ?? {}}/>}
         {!loading ? posts.map((post)=>{
           return(

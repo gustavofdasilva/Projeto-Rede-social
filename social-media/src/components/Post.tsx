@@ -1,5 +1,6 @@
 import React from 'react'
 import CroppedImage from './CroppedImage'
+import { formatDate } from '../utils/general'
 
 type Props = {
   userName: string,
@@ -7,16 +8,6 @@ type Props = {
   desc: string,
   img?: string,
   userImg?: string,
-}
-
-
-
-function formatDate(date: Date) {
-  const day = date.getDate().toString().length==1? `0${date.getDate()}` : date.getDate()
-  const month = date.getMonth().toString().length==1? `0${date.getMonth()}` : date.getMonth()
-  const year = date.getFullYear()
-
-  return `${day}/${month}/${year}`
 }
 
 const Post = (props: Props) => {

@@ -1,12 +1,18 @@
 import React from 'react'
 import CroppedImage from './CroppedImage'
-import { useNavigate } from 'react-router-dom'
+import { NavigateFunction, useNavigate } from 'react-router-dom'
 import { UserType } from '../utils/types'
 import defaultImg from '../assets/default-avatar.jpg'
 
 
 type Props = {
   user: UserType | Record<string,never>,
+}
+
+const handleGoToProfile = (props:Props, navigate:NavigateFunction) => {
+  JSON.stringify(props.user) != "{}" ?
+                navigate('/profile',{state:{data:props.user}}) :
+                navigate('/login')
 }
 
 const Navbar = (props:Props) => {
@@ -16,9 +22,7 @@ const Navbar = (props:Props) => {
         <h1 className="fs-2">Social Media</h1>
         <div className='d-flex flex-row'>
             <button className={`btn btn-secondary ${JSON.stringify(props.user) != "{}" ? 'p-0' : 'p-2'}`} onClick={()=>{
-              JSON.stringify(props.user) != "{}" ?
-                navigate('/profile',{state:{data:props.user}}) :
-                navigate('/login')
+              handleGoToProfile(props, navigate)
             }}>
               
               {!props.user?.username ? (props.user?.username ? 'Acessar perfil' : 'Logar') : 

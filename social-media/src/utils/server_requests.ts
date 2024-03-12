@@ -23,7 +23,7 @@ export async function getPosts(setPosts:React.Dispatch<React.SetStateAction<Home
   setPosts(newData)
 }
 
-async function getUser(email:string, password:string):Promise<UserType> {
+export async function getUser(email:string, password:string):Promise<UserType> {
   const response = await fetch('http://localhost:5000/users/profile',{
     method:"POST",
     headers:{
