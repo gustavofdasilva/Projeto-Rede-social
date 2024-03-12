@@ -1,5 +1,39 @@
-import {Post, User} from './types'
+import {HomePostType, PostType, UserType} from './types'
 import { NavigateFunction } from "react-router-dom"
+
+export async function getPosts(setPosts:React.Dispatch<React.SetStateAction<HomePostType[]>>) {
+  const response = await fetch('http://localhost:5000/posts/',{
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  const data:HomePostType[] = await response.json()
+  const newData = await Promise.all(
+    data.map(async(post)=>{
+      const user = await getUser(post.email,post.password)
+      return {
+        ...post,
+        userImg: user.img,
+        username: user.username,
+      }
+    }).reverse()
+  )
+
+  console.log(newData)
+  setPosts(newData)
+}
+
+async function getUser(email:string, password:string):Promise<UserType> {
+  const response = await fetch('http://localhost:5000/users/profile',{
+    method:"POST",
+    headers:{
+      'Content-type':'application/json'
+    },
+    body: JSON.stringify({email,password}),
+  })
+  const data = await response.json()
+  return data
+}
 
 export async function createUser(
     email: string | undefined, 
@@ -30,7 +64,7 @@ export async function createUser(
     }
 }
 
-export async function getAllUsers():Promise<User[]> {
+export async function getAllUsers():Promise<UserType[]> {
     const response = await fetch('http://localhost:5000/users/')
     const data =  await response.json()
   
@@ -60,7 +94,7 @@ export async function createPostFunc(
 
 export async function getAllUserPosts(
         userId: string, 
-        setPosts:React.Dispatch<React.SetStateAction<Post[]>>, 
+        setPosts:React.Dispatch<React.SetStateAction<PostType[]>>, 
         setLoading:React.Dispatch<React.SetStateAction<boolean>>
     ) {
     console.log(userId)
@@ -81,7 +115,7 @@ export async function fetchUser(
         email: string | undefined, 
         password: string | undefined, 
         //navigate: NavigateFunction
-    ) {
+    ):Promise<UserType | undefined> {
     if(email != undefined && password != undefined) {
       console.log("Email e senha DEFINIDO")
       try {
@@ -94,10 +128,11 @@ export async function fetchUser(
       })
       const data = await response.json()
       
-      document.cookie=`username=${data.username}`
-      document.cookie=`email=${data.email}`
-      document.cookie=`password=${data.password}`
-      //navigate('/profile',{state:{data}})
+      
+        document.cookie=`username=${data.username}`
+        document.cookie=`email=${data.email}`
+        document.cookie=`password=${data.password}`
+      return data
       } catch (error) {
         console.log(error)
       }
@@ -109,7 +144,7 @@ export async function updateProfile(
         _id: string, 
         newName: string, 
         newImgProfile: string | ArrayBuffer | undefined, 
-        user: User
+        user: UserType
     ) {
   
     const username = newName != '' ? newName : user.username

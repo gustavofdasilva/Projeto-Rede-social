@@ -1,27 +1,12 @@
 import { useRef, useState } from "react";
 import { Button, Modal } from "react-bootstrap"
 import CroppedImage from "./CroppedImage";
+import { PostType, UserType } from "../utils/types";
 
-type User = {
-  _id: string,
-  username: string,
-  password: string,
-  email:string,
-  img: string,
-}
 
-type Post = {
-  _id: string | undefined,
-  userId: string,
-  email: string,
-  password: string,
-  img: string,
-  desc: string,
-  date: Date,
-}
 
 type Props = {
-  user: User
+  user: UserType | Record<string,never>
 }
 
 const SendPost = (props: Props) => {
@@ -31,7 +16,7 @@ const SendPost = (props: Props) => {
   const handleOpenNewPost = () => setShowNewPost(true);
   const handleCloseNewPost = () => setShowNewPost(false)
 
-  const [createPost,setCreatePost] = useState<Post>({
+  const [createPost,setCreatePost] = useState<PostType>({
     _id: undefined,
     userId: props.user?._id,
     email: props.user?.email,

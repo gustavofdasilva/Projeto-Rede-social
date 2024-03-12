@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { NavigateFunction, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { fetchUser } from "../utils/server_requests"
 
 type Form = {
   email: string,
@@ -11,6 +12,26 @@ const Login = () => {
 
   const navigate = useNavigate()
   const [formData, setFormData] = useState<Form>()
+  const handleOnChangeEmail = (value: React.ChangeEvent<HTMLInputElement>):void => {
+    setFormData({
+      email:value.target.value,
+      password: formData?.password ?? '',
+      username: formData?.username ?? ''
+    })
+  }
+  const handleOnChangePassword = (value: React.ChangeEvent<HTMLInputElement>):void => {
+    setFormData({
+      email: formData?.email ?? '',
+      password: value.target.value,
+      username: formData?.username ?? ''
+    })
+  }
+  const handleConfirm = ():void => {
+    fetchUser(formData?.email,formData?.password)
+      .then((data)=>{
+        navigate('/profile',{state:{data}})
+      })
+  }
 
   return (
     <div className='d-flex vw-100 vh-100 bg-dark justify-content-center align-items-center'>
@@ -20,44 +41,17 @@ const Login = () => {
         <form action="/" method="GET" className="d-flex flex-column ">
 
           <label htmlFor="email" className="form-label">Email</label>
-          <input type="email" name="email" id="email" className={`mb-4 form-control`} required onChange={(value)=>{setFormData({email: value.target.value, password: formData?.password ?? '', username: formData?.username ?? ''})}}/>
+          <input type="email" name="email" id="email" className={`mb-4 form-control`} required onChange={handleOnChangeEmail}/>
 
           <label htmlFor="password" className="form-label">Senha</label>
-          <input type="password" name="password" id="password" className={`mb-2 form-control`} required onChange={(value)=>{setFormData({email: formData?.email ?? '', password: value.target.value, username: formData?.username ?? ''})}}/>
+          <input type="password" name="password" id="password" className={`mb-2 form-control`} required onChange={handleOnChangePassword}/>
 
-          <input type="button" value="Entrar na conta" className="btn btn-primary mb-2 mt-4" onClick={()=>{
-            fetchUser(formData?.email,formData?.password, navigate)
-            console.log("Clicou")
-          }}/>
+          <input type="button" value="Entrar na conta" className="btn btn-primary mb-2 mt-4" onClick={handleConfirm}/>
         </form>
         <aside className="">Não tem uma conta? <a href="/register">Cadastrar</a></aside>
       </main>
     </div>
   )
-}
-
-async function fetchUser(email: string | undefined, password: string | undefined, navigate: NavigateFunction) {
-  if(email != undefined && password != undefined) {
-    console.log("Email e senha DEFINIDO")
-    try {
-      const response = await fetch('http://localhost:5000/users/profile',{
-      method: "POST",
-      body: JSON.stringify({email, password}),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    const data = await response.json()
-    
-    document.cookie=`username=${data.username}`
-    document.cookie=`email=${data.email}`
-    document.cookie=`password=${data.password}`
-    navigate('/profile',{state:{data}})
-    } catch (error) {
-      console.log(error)
-    }
-      
-  }
 }
 
 export default Login

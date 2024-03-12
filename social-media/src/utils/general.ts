@@ -1,5 +1,6 @@
 import { isRouteErrorResponse } from "react-router-dom"
 import { fetchUser } from "./server_requests"
+import { UserType } from "./types"
 
 export function formatDate(date: Date) {
     const day = date.getDate().toString().length==1? `0${date.getDate()}` : date.getDate()
@@ -28,15 +29,17 @@ export function deleteCookie(name:string){
     document.cookie=`${name}=null`
 }
 
-export async function checkUser() {
+export async function checkUser():Promise<UserType | Record<string, never>> {
     const username = getCookie('username')
     const email = getCookie('email')
     const password = getCookie('password')
   
     if(username && email && password) {
-      return await fetchUser(email,password)
+      const data:UserType|undefined = await fetchUser(email,password)
+
+      return data ?? {}
     } else {
-      return false
+      return {}
     }
 }
 

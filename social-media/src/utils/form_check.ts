@@ -1,17 +1,17 @@
 import { getAllUsers } from './server_requests'
-import {Form, User} from './types'
+import {FormType, UserType} from './types'
 
 export async function checkEmail(
         value:string, 
         setEmail: React.Dispatch<React.SetStateAction<boolean>>, 
-        formData:Form | undefined,
-        setFormData: React.Dispatch<React.SetStateAction<Form | undefined>>
+        formData:FormType | undefined,
+        setFormData: React.Dispatch<React.SetStateAction<FormType | undefined>>
     ) {
     const users = await getAllUsers()
     const regulation = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/) //eslint-disable-line
     const formattedValue = regulation.test(value)
   
-    const equalEmails = users.filter((user: User)=>{
+    const equalEmails = users.filter((user: UserType)=>{
       return user.email == value
     })
     
@@ -28,8 +28,8 @@ export async function checkEmail(
 export function checkPassword(
         value:string, 
         setPassword: React.Dispatch<React.SetStateAction<boolean>>,
-        formData: Form | undefined, 
-        setFormData: React.Dispatch<React.SetStateAction<Form | undefined>>
+        formData: FormType | undefined, 
+        setFormData: React.Dispatch<React.SetStateAction<FormType | undefined>>
     ) {
     if(value.length >= 6) {
       setPassword(true)  
@@ -46,11 +46,11 @@ export function checkPassword(
 export async function checkName(
         value:string, 
         setUsername: React.Dispatch<React.SetStateAction<boolean>>, 
-        formData:Form | undefined,
-        setFormData: React.Dispatch<React.SetStateAction<Form | undefined>>
+        formData:FormType | undefined,
+        setFormData: React.Dispatch<React.SetStateAction<FormType | undefined>>
     ) {
     const users = await getAllUsers()
-    const equalNames = users.filter((user: User)=>{
+    const equalNames = users.filter((user: UserType)=>{
       if(user.username == value) {
         return true
       } else {
@@ -71,7 +71,7 @@ export async function checkName(
 }
 
 export function checkImg(
-        user: User, 
+        user: UserType, 
         imgPreview: string | ArrayBuffer | undefined, defaultPath:string
     ) {
     const userImg = user.img
