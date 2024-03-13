@@ -7,6 +7,7 @@ import { PostType, UserType } from "../utils/types";
 import { convertTo64, deleteCookie, formatDate } from "../utils/general";
 import { checkImg, checkName } from "../utils/form_check";
 import ModalTemplate from "../components/ModalTemplate";
+import { Alert } from "react-bootstrap";
 
 const Profile = () => {
   const {state} = useLocation()
@@ -38,11 +39,16 @@ const Profile = () => {
 
   const [showUpdateProfile, setShowUpdateProfile] = useState(false);
     const handleOpenUpdateProfile = () => setShowUpdateProfile(true);
-    const handleCloseUpdateProfile = () => setShowUpdateProfile(false)
+    const handleCloseUpdateProfile = () => {
+      setShowUpdateProfile(false)
+      setShowAlert(false)
+    }
 
   const [showNewPost, setShowNewPost] = useState(false);
     const handleOpenNewPost = () => setShowNewPost(true);
     const handleCloseNewPost = () => setShowNewPost(false)
+
+  const [showAlert,setShowAlert] = useState(false)
   
   const handleHomeButton = ():void => {
     deleteCookie('username')
@@ -60,13 +66,13 @@ const Profile = () => {
   }
 
   const handleConfirmChangeProfile = ():void => {
-    if(newName.length>0||imgPreview!=null){
+    if((newName.length>0||imgPreview!=null) && !showAlert){
       updateProfile(user._id, newName, imgPreview,user)
       .then(()=>{
         window.location.reload()
       })
     } else {
-      window.alert('Campos vazios')
+      window.alert('Não foi possível alterar o usuário')
     }
   }
 
@@ -88,8 +94,14 @@ const Profile = () => {
       })
   }
 
-  const handleModalChangeText = (value:React.ChangeEvent<HTMLTextAreaElement>):void=>{
-    setNewName(value.target.value)
+  const handleModalChangeText = async (value:React.ChangeEvent<HTMLTextAreaElement>):Promise<void>=>{
+    const name = await checkName(value.target.value)
+    if(name) {
+      setNewName(value.target.value)
+      setShowAlert(false)
+    } else if(!name && value.target.value.length>0) {
+      setShowAlert(true)
+    }
   }
 
   const [newName,setNewName] = useState<string>('')
@@ -190,6 +202,13 @@ const Profile = () => {
           setPostImg(image)
         }
       }}/>
+
+      {showAlert && 
+        <Alert variant="danger" className="position-absolute top-0 start-1 m-2 mt-2">
+        Nome de usuário já em uso!
+        </Alert>
+      }
+
     </div>
   )
 }

@@ -27,27 +27,24 @@ export async function checkEmail(
 
 export function checkPassword(
         value:string, 
-        setPassword: React.Dispatch<React.SetStateAction<boolean>>,
-        formData: FormType | undefined, 
-        setFormData: React.Dispatch<React.SetStateAction<FormType | undefined>>
     ) {
     if(value.length >= 6) {
-      setPassword(true)  
-      setFormData({
-        email: formData?.email ?? '',
-        username: formData?.username ?? '',
-        password: value
-      })
-    } else {
-      setPassword(false)
+      return value
     }
+      // setPassword(true)  
+      // setFormData({
+      //   email: formData?.email ?? '',
+      //   username: formData?.username ?? '',
+      //   password: value
+      // })
+    // } else {
+    //   // setPassword(false)
+    // }
+    return false
 }
 
 export async function checkName(
         value:string, 
-        setUsername: React.Dispatch<React.SetStateAction<boolean>>, 
-        formData:FormType | undefined,
-        setFormData: React.Dispatch<React.SetStateAction<FormType | undefined>>
     ) {
     const users = await getAllUsers()
     const equalNames = users.filter((user: UserType)=>{
@@ -57,17 +54,19 @@ export async function checkName(
         return false
       }
     })
-    console.log(equalNames)
     if(equalNames.length == 0 && value != "") {
-      setUsername(true)
-      setFormData({
-        email: formData?.email ?? '',
-        username: value,
-        password: formData?.password ?? '',
-      })
-    } else {
-      setUsername(false)
+      return value
+      // setUsername(true)
+      // setFormData({
+      //   email: formData?.email ?? '',
+      //   username: value,
+      //   password: formData?.password ?? '',
+      // })
     }
+    return false
+    // } else {
+    //   setUsername(false)
+    // }
 }
 
 export function checkImg(
