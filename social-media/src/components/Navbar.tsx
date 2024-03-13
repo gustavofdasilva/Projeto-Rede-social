@@ -19,7 +19,7 @@ const Navbar = (props:Props) => {
   const navigate = useNavigate()
   return (
     <nav className="d-flex align-items-center w-100 navbar bg-dark text-white pe-5 ps-5">
-        <h1 className="fs-2">Social Media</h1>
+        <h1 className="fs-2">Rede Social</h1>
         <div className='d-flex flex-row'>
             <button className={`btn btn-secondary ${JSON.stringify(props.user) != "{}" ? 'p-0' : 'p-2'}`} onClick={()=>{
               handleGoToProfile(props, navigate)

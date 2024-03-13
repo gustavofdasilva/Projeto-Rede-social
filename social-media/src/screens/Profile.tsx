@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import CroppedImage from "../components/CroppedImage"
-import Modal from 'react-bootstrap/Modal';
-import { Button } from "react-bootstrap";
 import defaultIcon from '../assets/default-avatar.jpg'
 import { createPostFunc, deletePost, getAllUserPosts, getUser, updateProfile } from "../utils/server_requests";
 import { PostType, UserType } from "../utils/types";
 import { convertTo64, deleteCookie, formatDate } from "../utils/general";
-import { checkImg } from "../utils/form_check";
+import { checkImg, checkName } from "../utils/form_check";
+import ModalTemplate from "../components/ModalTemplate";
 
 const Profile = () => {
   const {state} = useLocation()
@@ -82,6 +81,17 @@ const Profile = () => {
     }
   }
 
+  const handleModalChangeTextPost = (value:React.ChangeEvent<HTMLTextAreaElement>):void=>{
+      setCreatePost({
+        ...createPost,
+        desc: value.target.value
+      })
+  }
+
+  const handleModalChangeText = (value:React.ChangeEvent<HTMLTextAreaElement>):void=>{
+    setNewName(value.target.value)
+  }
+
   const [newName,setNewName] = useState<string>('')
 
   const navigate = useNavigate()
@@ -135,46 +145,36 @@ const Profile = () => {
       </main>
 
       {/*//! Check user para não ter o mesmo nome de usuário*/}
-      <Modal show={showUpdateProfile} onHide={handleCloseUpdateProfile} className="d-flex justify-content-center align-items-center"> {/*Update profile*/}
-        <Modal.Header closeButton>
-          <Modal.Title>Alterar perfil</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="p-4 d-flex flex-column">
-          <div className="d-flex flex-row mb-3 mt-3">
-            <p className="m-0 me-4 fs-5">Nome: </p>
-            <input type="text" name="text" id="text" className="input-group-text" onChange={(value)=>{
-              setNewName(value.target.value) 
-            }}/>
-          </div>
-          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>inputFileUpdateProfile.current?.click()}> Alterar foto de perfil</Button>
-        </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-center">
-          <Button onClick={handleConfirmChangeProfile}>Salvar mudanças</Button>
-        </Modal.Footer>
-      </Modal>
 
-      <Modal show={showNewPost} onHide={handleCloseNewPost} className="d-flex justify-content-center align-items-center"> {/*New Post*/}
-        <Modal.Header closeButton>
-          <Modal.Title>Novo post</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="p-4 d-flex flex-column">
-          <div className="d-flex flex-row mb-3 mt-3">
-            <p className="m-0 me-4 fs-5">Descrição: </p>
-            <textarea name="desc" id="desc" cols={30} rows={5} className="input-group-text text-start" onChange={(value)=>{setCreatePost({
-                ...createPost,
-                desc: value.target.value
-              })
-            }}>
-            </textarea>
-          </div>
-          {postImg && <CroppedImage width={200} height={200} filePath={postImg} className="align-self-center"/>}
-          <Button variant="outline-primary" className="mt-3 mb-3" onClick={()=>inputFileNewPost.current?.click()}>Inserir foto no post</Button>
-        </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-center">
-          <Button onClick={handleConfirmNewPost}>Postar publicação</Button>
-        </Modal.Footer>
-      </Modal>
-      
+      <ModalTemplate
+        title="Alterar perfil"
+        showModal={showUpdateProfile}
+        handleClose={handleCloseUpdateProfile}
+        onTypingText={handleModalChangeText}
+        onConfirm={handleConfirmChangeProfile}
+        confirmText="Salvar mudanças"
+        inputFileImg={inputFileUpdateProfile}
+        textDesc="Nome: "
+        sendImgDesc="Alterar foto de perfil"
+        textAreaRows={1}
+        textMaxLength={20}
+      />
+
+      <ModalTemplate
+        title="Novo post"
+        sendImgDesc="Inserir foto no post"
+        onTypingText={handleModalChangeTextPost}
+        onConfirm={handleConfirmNewPost}
+        confirmText="Postar publicação"
+        handleClose={handleCloseNewPost}
+        showModal={showNewPost}
+        inputFileImg={inputFileNewPost}
+        textDesc="Descrição: "
+        textAreaRows={5}
+        textMaxLength={140}
+        previewImg={postImg}
+      />
+
       <input style={{display:"none"}} ref={inputFileUpdateProfile} type="file" accept=".png, .jpg, .jpeg"name="profileImage" id="profileImage" onChange={async (value)=>{
           const file = value.target.files
           if(file !== null) {
